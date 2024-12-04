@@ -38,7 +38,7 @@ public class Analizador {
             ">", "<", "==", ">=", "<=", "!="
     ));
     private static final Set<String> OPERADOR_LOGICO = new HashSet<>(Arrays.asList(
-             "!"
+             "!", "."
     ));
     private static final Set<String> OPERADOR_INC_DEC = new HashSet<>(Arrays.asList(
             "++", "--"
@@ -70,12 +70,13 @@ public class Analizador {
             System.out.println("");
         }
     }
+
+
     // Analizador Léxico (genera tokens)
     /**/
     private static List<Token> analizarLexico(String linea) {
         List<Token> tokens = new ArrayList<>();
         String tokenActual = "";
-        char comillas = '"';
         for (int i = 0; i < linea.length(); i++) {
             char caracter = linea.charAt(i);
             if (Character.isWhitespace(caracter)) {
@@ -84,18 +85,28 @@ public class Analizador {
                     tokenActual = "";
                 }
             }
-            else if (caracter == comillas && tokenActual.isEmpty()) { // Comienza una cadena
+            else if (caracter == '"' && tokenActual.isEmpty()) { // Comienza una cadena
                 tokenActual += caracter;
-                tokens.add(new Token(tokenActual, TipoToken.COMILLA_DOBLE));
                 while (++i < linea.length() && linea.charAt(i) != '"') {
                     tokenActual += linea.charAt(i);
                 }
                 tokenActual += linea.charAt(i); // Agrega la " de cierre
                 tokens.add(new Token(tokenActual, TipoToken.CADENA));
-                tokenActual = "\"";
-                tokens.add(new Token(tokenActual, TipoToken.COMILLA_DOBLE));
                 tokenActual = "";
             } 
+            /*
+            else if (caracter == '"' && tokenActual.isEmpty()) { // Comienza una cadena
+                tokenActual += caracter; // Añadimos la primera comilla
+                while (++i < linea.length() && linea.charAt(i) != '"') {
+                    tokenActual += linea.charAt(i); // Añade los caracteres dentro de la cadena
+                }
+                if (i < linea.length() && linea.charAt(i) == '"') {
+                    tokenActual += linea.charAt(i); // Añade la comilla de cierre
+                }
+                tokens.add(new Token(tokenActual, TipoToken.CADENA)); // Crea el token de tipo cadena
+                tokenActual = ""; // Reiniciar tokenActual para siguiente token
+            }*/
+            
             else if (caracter == '#' && tokenActual.isEmpty()) {
                 tokens.add(new Token("#", TipoToken.FIN_DE_LINEA));
             } else if (caracter == '=' && tokenActual.isEmpty()) {
@@ -141,19 +152,16 @@ public class Analizador {
             return TipoToken.NUMERO_F;
         }
         else if (token.equals("si")) {
-            return TipoToken.PALABRAS_BOOL;  // Cambiar aquí para detectar 'si' y 'no'
+            return TipoToken.PALABRAS_BOOL;  
         }
         else if (token.equals("no")) {
-            return TipoToken.PALABRAS_BOOL;  // Cambiar aquí para detectar 'si' y 'no'
+            return TipoToken.PALABRAS_BOOL;  
         }
         else if (token.equals("#")) {
             return TipoToken.FIN_DE_LINEA;
         }
         else if (token.equals("\"")) {  // Comillas dobles
             return TipoToken.COMILLA_DOBLE;
-        }
-        else if (token.equals(":")) {  // Dos puntos
-            return TipoToken.DOS_PUNTOS;
         }
         return TipoToken.DESCONOCIDO;
     }
@@ -170,7 +178,3 @@ class Token {
     }
 }
 
-// Enumeración para los tipos de token
-
-
-// Clase para el parser
