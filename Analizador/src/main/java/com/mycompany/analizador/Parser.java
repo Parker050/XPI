@@ -1,8 +1,15 @@
-
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package com.mycompany.analizador;
 
 import java.util.List;
 
+/**
+ *
+ * @author danielaperez
+ */
 public class Parser {
     private List<Token> tokens;
     private int index;
@@ -54,7 +61,7 @@ public class Parser {
                 else if (currentToken().valor.equals("final")) {
                     declaracionConstante();
                 }
-                else if (currentToken().valor.equals("wacha")) {
+                else if (currentToken().valor.equals("rola")) {
                     declaracionRecibir();
                 }
                 else {
@@ -152,22 +159,21 @@ public class Parser {
     private void declaracionRecibir() {
         consume(TipoToken.PALABRA_RESERVADA); // Consume 'wacha'
 
-        // Determine the type of data being received
+        // Verificar que comience con 'rola'
+        consume(TipoToken.PUNTO);
+
+        // Verificar el tipo de dato
         Token tipoToken = currentToken();
         if (tipoToken.valor.equals("entero") || 
             tipoToken.valor.equals("flota") || 
             tipoToken.valor.equals("cadena") || 
             tipoToken.valor.equals("decompas")) {
-            consume(TipoToken.PALABRA_RESERVADA); // Consume the data type
+            consume(TipoToken.PALABRA_RESERVADA); // Consume el tipo de dato
         } else {
             throw new RuntimeException("Error de sintaxis: tipo de dato no válido para wacha");
         }
 
-        // Consume the 'rola' identifier
-        consume(TipoToken.PUNTO);
-        consume(TipoToken.ID);
-
-        // Consume the end of line marker
+        // Consume el fin de línea
         consume(TipoToken.FIN_DE_LINEA);
     }
 
