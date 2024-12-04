@@ -75,6 +75,7 @@ public class Analizador {
     private static List<Token> analizarLexico(String linea) {
         List<Token> tokens = new ArrayList<>();
         String tokenActual = "";
+        char comillas = '"';
         for (int i = 0; i < linea.length(); i++) {
             char caracter = linea.charAt(i);
             if (Character.isWhitespace(caracter)) {
