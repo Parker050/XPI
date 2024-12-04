@@ -1,6 +1,4 @@
-
 package com.mycompany.analizador;
-
 
 public enum TipoToken {
     PALABRA_RESERVADA,
@@ -17,6 +15,8 @@ public enum TipoToken {
     PARENTESIS_CIERRE,
     LLAVE_AP,
     LLAVE_CIERRE,
+    CORCHETE_AP,
+    CORCHETE_CIERRE,
     FIN_DE_LINEA,
     DESCONOCIDO,
     NUMERO_F,
