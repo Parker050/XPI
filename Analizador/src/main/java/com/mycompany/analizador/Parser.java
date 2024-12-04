@@ -1,15 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.analizador;
 
 import java.util.List;
 
-/**
- *
- * @author danielaperez
- */
 public class Parser {
     private List<Token> tokens;
     private int index;
@@ -58,12 +50,48 @@ public class Parser {
                 else if (currentToken().valor.equals("porcada")) {
                     sentenciaControlFor();
                 }
+                else if (currentToken().valor.equals("opcion")){
+                    sentenciaControlOpciones();
+                }
                 else {
                     sentenciaControl();
                 }
             } else {
                 throw new RuntimeException("Error de sintaxis en la línea: " + currentToken().valor);
             }
+        }
+    }
+    
+    private void declaraciónVariableSinCierre(String tipo) {
+        switch (tipo) {
+            case "entero":
+                consume(TipoToken.PALABRA_RESERVADA); // Consume tipo de variable
+                consume(TipoToken.ID); // Consume nombre var
+                consume(TipoToken.IGUAL); // Consume '='
+                valor(); // Consume valor  var
+                break;
+            case "flota":
+                consume(TipoToken.PALABRA_RESERVADA); // Consume tipo de variable "flota"
+                consume(TipoToken.ID); // Consume nombre de la variable
+                consume(TipoToken.IGUAL); // Consume '='
+                valor(); // Aquí se valida que el valor sea un número flotante
+                break;
+            case "cadena":
+                consume(TipoToken.PALABRA_RESERVADA); // Consume tipo de variable "cadena"
+                consume(TipoToken.ID); // Consume nombre de la variable
+                consume(TipoToken.IGUAL); // Consume '='
+                consume(TipoToken.COMILLA_DOBLE); // Consume la primera comilla doble
+                valor(); // Aquí se valida que el valor sea una cadena
+                consume(TipoToken.COMILLA_DOBLE); // Consume la segunda comilla doble
+                break;
+            case "decompas":
+                consume(TipoToken.PALABRA_RESERVADA); // Consume tipo de variable 'decompas'
+                consume(TipoToken.ID); // Consume nombre var
+                consume(TipoToken.IGUAL); // Consume '='
+                valor(); // Aquí se valida que el valor sea 'si' o 'no' (en el caso de 'decompas')
+                break;
+            default:
+                throw new AssertionError();
         }
     }
 
@@ -352,6 +380,38 @@ public class Parser {
             }
         } else {
             throw new RuntimeException("Error de sintaxis: sentencia de control desconocida, se esperaba 'porcada'");
+        }
+    }
+
+    //OPCIONES
+    private void sentenciaControlOpciones(){
+        consume(TipoToken.PALABRA_RESERVADA);
+        consume(TipoToken.PARENTESIS_AP);
+        consume(TipoToken.ID);
+        consume(TipoToken.PARENTESIS_CIERRE);
+        consume(TipoToken.LLAVE_AP);
+
+        while (currentToken() != null && currentToken().tipo != TipoToken.LLAVE_CIERRE) {
+            consume(TipoToken.PALABRA_RESERVADA);
+            consume(TipoToken.NUMERO);
+            consume(TipoToken.DOS_PUNTOS);
+
+            if (currentToken().tipo == TipoToken.PALABRA_RESERVADA) {
+                if (currentToken().valor.equals("entero") || currentToken().valor.equals("flota") || currentToken().valor.equals("cadena") || currentToken().valor.equals("decompas")) {
+                    declaraciónVariableSinCierre(currentToken().valor);
+                } else {
+                    throw new RuntimeException("Error de sintaxis en la línea: " + currentToken().valor);
+                }
+            } else {
+                throw new RuntimeException("Error de sintaxis en la línea: " + currentToken().valor);
+            }
+            consume(TipoToken.PALABRA_RESERVADA);//Consume yabasta
+            consume(TipoToken.FIN_DE_LINEA);
+        }
+        if (currentToken() != null && currentToken().tipo == TipoToken.LLAVE_CIERRE) {
+            consume(TipoToken.LLAVE_CIERRE); //  '}'
+        } else {
+            throw new RuntimeException("Error de sintaxis: se esperaba una llave de cierre '}'");
         }
     }
 
