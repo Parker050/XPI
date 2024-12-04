@@ -1,4 +1,6 @@
+
 package com.mycompany.analizador;
+
 
 public enum TipoToken {
     PALABRA_RESERVADA,
@@ -19,5 +21,5 @@ public enum TipoToken {
     DESCONOCIDO,
     NUMERO_F,
     COMILLA_DOBLE,
-    DOS_PUNTOS
+    PUNTO
 }
