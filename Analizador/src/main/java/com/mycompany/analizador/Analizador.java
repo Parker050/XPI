@@ -119,7 +119,11 @@ public class Analizador {
                 tokens.add(new Token("{", TipoToken.LLAVE_AP));
             } else if (caracter == '}' && tokenActual.isEmpty()) {
                 tokens.add(new Token("}", TipoToken.LLAVE_CIERRE));
-            } else {
+            } 
+            else if (caracter == '.' && tokenActual.isEmpty()) {
+                tokens.add(new Token(".", TipoToken.PUNTO));
+            }
+            else {
                 tokenActual += caracter;
             }
         }
