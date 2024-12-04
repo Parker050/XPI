@@ -263,8 +263,7 @@ public class Parser {
     
     // DO-WHILE
     private void sentenciaControlDoWhile() {
-        if (currentToken().valor.equals("muevelas")) { // Verificamos si es 'muevelas', que es el equivalente a 'do'
-            // Procesa la sentencia do-while
+        if (currentToken().valor.equals("muevelas")) {
             consume(TipoToken.PALABRA_RESERVADA); // Consume 'muevelas' (equivalente a 'do')
 
             consume(TipoToken.LLAVE_AP); // Consume '{'
@@ -272,8 +271,6 @@ public class Parser {
             // Procesa el cuerpo del do-while
             while (currentToken() != null && currentToken().tipo != TipoToken.LLAVE_CIERRE) {
                 if (currentToken().tipo == TipoToken.PALABRA_RESERVADA) {
-                    // Si encontramos una palabra reservada, podría ser una declaración de variable
-                    // o una sentencia de control.
                     if (currentToken().valor.equals("entero") || currentToken().valor.equals("flota") || currentToken().valor.equals("cadena") || currentToken().valor.equals("decompas")) {
                         declaraciónVariable();
                     } else if (currentToken().valor.equals("sidiosquiere") || currentToken().valor.equals("noquiso")) {
@@ -292,7 +289,6 @@ public class Parser {
                 throw new RuntimeException("Error de sintaxis: se esperaba una llave de cierre '}'");
             }
 
-            // Verificamos la condición después de ejecutar el bloque
             consume(TipoToken.PALABRA_RESERVADA); // Consume 'mientras'
             consume(TipoToken.PARENTESIS_AP); // Consume '('
             consume(TipoToken.ID);
