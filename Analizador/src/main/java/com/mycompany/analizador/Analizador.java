@@ -70,13 +70,12 @@ public class Analizador {
             System.out.println("");
         }
     }
-
-
     // Analizador Léxico (genera tokens)
     /**/
     private static List<Token> analizarLexico(String linea) {
         List<Token> tokens = new ArrayList<>();
         String tokenActual = "";
+        char comillas = '"';
         for (int i = 0; i < linea.length(); i++) {
             char caracter = linea.charAt(i);
             if (Character.isWhitespace(caracter)) {
@@ -93,20 +92,7 @@ public class Analizador {
                 tokenActual += linea.charAt(i); // Agrega la " de cierre
                 tokens.add(new Token(tokenActual, TipoToken.CADENA));
                 tokenActual = "";
-            } 
-            /*
-            else if (caracter == '"' && tokenActual.isEmpty()) { // Comienza una cadena
-                tokenActual += caracter; // Añadimos la primera comilla
-                while (++i < linea.length() && linea.charAt(i) != '"') {
-                    tokenActual += linea.charAt(i); // Añade los caracteres dentro de la cadena
-                }
-                if (i < linea.length() && linea.charAt(i) == '"') {
-                    tokenActual += linea.charAt(i); // Añade la comilla de cierre
-                }
-                tokens.add(new Token(tokenActual, TipoToken.CADENA)); // Crea el token de tipo cadena
-                tokenActual = ""; // Reiniciar tokenActual para siguiente token
-            }*/
-            
+            }
             else if (caracter == '#' && tokenActual.isEmpty()) {
                 tokens.add(new Token("#", TipoToken.FIN_DE_LINEA));
             } else if (caracter == '=' && tokenActual.isEmpty()) {
@@ -122,8 +108,11 @@ public class Analizador {
             } 
             else if (caracter == '.' && tokenActual.isEmpty()) {
                 tokens.add(new Token(".", TipoToken.PUNTO));
-            }
-            else {
+            }else if (caracter == '[' && tokenActual.isEmpty()) {
+                tokens.add(new Token("[", TipoToken.CORCHETE_AP));
+            } else if (caracter == ']' && tokenActual.isEmpty()) {
+                tokens.add(new Token("]", TipoToken.CORCHETE_CIERRE));
+            }else {
                 tokenActual += caracter;
             }
         }
@@ -167,6 +156,9 @@ public class Analizador {
         else if (token.equals("\"")) {  // Comillas dobles
             return TipoToken.COMILLA_DOBLE;
         }
+        else if (token.equals(":")) {  // Dos puntos
+            return TipoToken.DOS_PUNTOS;
+        }
         return TipoToken.DESCONOCIDO;
     }
 }
@@ -181,4 +173,3 @@ class Token {
         this.tipo = tipo;
     }
 }
-
