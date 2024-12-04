@@ -1,7 +1,15 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package com.mycompany.analizador;
 
 import java.util.List;
 
+/**
+ *
+ * @author danielaperez
+ */
 public class Parser {
     private List<Token> tokens;
     private int index;
@@ -50,8 +58,11 @@ public class Parser {
                 else if (currentToken().valor.equals("porcada")) {
                     sentenciaControlFor();
                 }
-                else if (currentToken().valor.equals("opcion")){
-                    sentenciaControlOpciones();
+                else if (currentToken().valor.equals("final")) {
+                    declaracionConstante();
+                }
+                else if (currentToken().valor.equals("wacha")) {
+                    declaracionRecibir();
                 }
                 else {
                     sentenciaControl();
@@ -59,39 +70,6 @@ public class Parser {
             } else {
                 throw new RuntimeException("Error de sintaxis en la línea: " + currentToken().valor);
             }
-        }
-    }
-    
-    private void declaraciónVariableSinCierre(String tipo) {
-        switch (tipo) {
-            case "entero":
-                consume(TipoToken.PALABRA_RESERVADA); // Consume tipo de variable
-                consume(TipoToken.ID); // Consume nombre var
-                consume(TipoToken.IGUAL); // Consume '='
-                valor(); // Consume valor  var
-                break;
-            case "flota":
-                consume(TipoToken.PALABRA_RESERVADA); // Consume tipo de variable "flota"
-                consume(TipoToken.ID); // Consume nombre de la variable
-                consume(TipoToken.IGUAL); // Consume '='
-                valor(); // Aquí se valida que el valor sea un número flotante
-                break;
-            case "cadena":
-                consume(TipoToken.PALABRA_RESERVADA); // Consume tipo de variable "cadena"
-                consume(TipoToken.ID); // Consume nombre de la variable
-                consume(TipoToken.IGUAL); // Consume '='
-                consume(TipoToken.COMILLA_DOBLE); // Consume la primera comilla doble
-                valor(); // Aquí se valida que el valor sea una cadena
-                consume(TipoToken.COMILLA_DOBLE); // Consume la segunda comilla doble
-                break;
-            case "decompas":
-                consume(TipoToken.PALABRA_RESERVADA); // Consume tipo de variable 'decompas'
-                consume(TipoToken.ID); // Consume nombre var
-                consume(TipoToken.IGUAL); // Consume '='
-                valor(); // Aquí se valida que el valor sea 'si' o 'no' (en el caso de 'decompas')
-                break;
-            default:
-                throw new AssertionError();
         }
     }
 
@@ -125,7 +103,80 @@ public class Parser {
         valor(); // Aquí se valida que el valor sea 'si' o 'no' (en el caso de 'decompas')
         consume(TipoToken.FIN_DE_LINEA); // Consume '#'
     }
+    private void declaracionConstante() {
+        consume(TipoToken.PALABRA_RESERVADA); // Consume 'final'
 
+        // Determine the constant type
+        Token tipoToken = currentToken();
+        if (tipoToken.valor.equals("entero") || 
+            tipoToken.valor.equals("flota") || 
+            tipoToken.valor.equals("cadena") || 
+            tipoToken.valor.equals("decompas")) {
+            consume(TipoToken.PALABRA_RESERVADA); // Consume the data type
+        } else {
+            throw new RuntimeException("Error de sintaxis: tipo de constante no válido");
+        }
+
+        consume(TipoToken.ID); // Consume the constant identifier
+        consume(TipoToken.IGUAL); // Consume '='
+
+        // Validate the value based on the constant type
+        if (tipoToken.valor.equals("entero")) {
+            // For integer constants
+            if (currentToken().tipo == TipoToken.NUMERO) {
+                consume(TipoToken.NUMERO);
+            } else {
+                throw new RuntimeException("Error de sintaxis: se esperaba un número entero para la constante");
+            }
+        } else if (tipoToken.valor.equals("flota")) {
+            // For float constants
+            if (currentToken().tipo == TipoToken.NUMERO_F) {
+                consume(TipoToken.NUMERO_F);
+            } else {
+                throw new RuntimeException("Error de sintaxis: se esperaba un número flotante para la constante");
+            }
+        } else if (tipoToken.valor.equals("cadena")) {
+            // For string constants
+            consume(TipoToken.COMILLA_DOBLE); // First double quote
+            if (currentToken().tipo == TipoToken.CADENA) {
+                consume(TipoToken.CADENA);
+            } else {
+                throw new RuntimeException("Error de sintaxis: se esperaba una cadena para la constante");
+            }
+            consume(TipoToken.COMILLA_DOBLE); // Closing double quote
+        } else if (tipoToken.valor.equals("decompas")) {
+            // For boolean constants
+            if (currentToken().tipo == TipoToken.PALABRAS_BOOL && 
+                (currentToken().valor.equals("si") || currentToken().valor.equals("no"))) {
+                consume(TipoToken.PALABRAS_BOOL);
+            } else {
+                throw new RuntimeException("Error de sintaxis: se esperaba 'si' o 'no' para la constante booleana");
+            }
+        }
+
+        consume(TipoToken.FIN_DE_LINEA); // Consume '#'
+    }
+    private void declaracionRecibir() {
+        consume(TipoToken.PALABRA_RESERVADA); // Consume 'wacha'
+
+        // Determine the type of data being received
+        Token tipoToken = currentToken();
+        if (tipoToken.valor.equals("entero") || 
+            tipoToken.valor.equals("flota") || 
+            tipoToken.valor.equals("cadena") || 
+            tipoToken.valor.equals("decompas")) {
+            consume(TipoToken.PALABRA_RESERVADA); // Consume the data type
+        } else {
+            throw new RuntimeException("Error de sintaxis: tipo de dato no válido para wacha");
+        }
+
+        // Consume the 'rola' identifier
+        consume(TipoToken.PUNTO);
+        consume(TipoToken.ID);
+
+        // Consume the end of line marker
+        consume(TipoToken.FIN_DE_LINEA);
+    }
 
     private void valor() {
         Token tokenActual = currentToken();
@@ -147,24 +198,34 @@ public class Parser {
         else {
             throw new RuntimeException("Error de sintaxis: se esperaba un valor pero se encontró '" + tokenActual.valor + "'");
         }
+        
+        tokenActual = currentToken();
+        if (tokenActual != null && tokenActual.tipo == TipoToken.OPERADOR_ARITMETICO) {
+            consume(TipoToken.OPERADOR_ARITMETICO); // Consume el operador
+            
+            // Consumir el segundo valor
+            tokenActual = currentToken();
+            if (tokenActual.tipo == TipoToken.NUMERO_F) {
+                consume(TipoToken.NUMERO_F); // Consume número flotante
+            } 
+            else if (tokenActual.tipo == TipoToken.NUMERO) {
+                consume(TipoToken.NUMERO); // Consume número entero
+            }
+            else {
+                throw new RuntimeException("Error de sintaxis: se esperaba un segundo valor después del operador aritmético");
+            }
+        }
     }
 
 
     private void funcion() {
         consume(TipoToken.PALABRA_RESERVADA); // Consume 'palabanda'
-
         consume(TipoToken.PALABRA_RESERVADA); // Consume 'void'
-
         consume(TipoToken.ID); // Consume el identificador (nombre de la función)
-
         consume(TipoToken.PARENTESIS_AP); // Consume '('
-
         consume(TipoToken.PARENTESIS_CIERRE); // Consume ')'
-
         consume(TipoToken.LLAVE_AP); // Consume '{'
 
-        // Aquí comenzamos a procesar el cuerpo de la función, que puede contener declaraciones
-        // y estructuras de control.
         while (currentToken() != null && currentToken().tipo != TipoToken.LLAVE_CIERRE) {
             // Dentro de la función pueden haber declaraciones, sentencias, etc.
             if (currentToken().tipo == TipoToken.PALABRA_RESERVADA) {
@@ -380,38 +441,6 @@ public class Parser {
             }
         } else {
             throw new RuntimeException("Error de sintaxis: sentencia de control desconocida, se esperaba 'porcada'");
-        }
-    }
-
-    //OPCIONES
-    private void sentenciaControlOpciones(){
-        consume(TipoToken.PALABRA_RESERVADA);
-        consume(TipoToken.PARENTESIS_AP);
-        consume(TipoToken.ID);
-        consume(TipoToken.PARENTESIS_CIERRE);
-        consume(TipoToken.LLAVE_AP);
-
-        while (currentToken() != null && currentToken().tipo != TipoToken.LLAVE_CIERRE) {
-            consume(TipoToken.PALABRA_RESERVADA);
-            consume(TipoToken.NUMERO);
-            consume(TipoToken.DOS_PUNTOS);
-
-            if (currentToken().tipo == TipoToken.PALABRA_RESERVADA) {
-                if (currentToken().valor.equals("entero") || currentToken().valor.equals("flota") || currentToken().valor.equals("cadena") || currentToken().valor.equals("decompas")) {
-                    declaraciónVariableSinCierre(currentToken().valor);
-                } else {
-                    throw new RuntimeException("Error de sintaxis en la línea: " + currentToken().valor);
-                }
-            } else {
-                throw new RuntimeException("Error de sintaxis en la línea: " + currentToken().valor);
-            }
-            consume(TipoToken.PALABRA_RESERVADA);//Consume yabasta
-            consume(TipoToken.FIN_DE_LINEA);
-        }
-        if (currentToken() != null && currentToken().tipo == TipoToken.LLAVE_CIERRE) {
-            consume(TipoToken.LLAVE_CIERRE); //  '}'
-        } else {
-            throw new RuntimeException("Error de sintaxis: se esperaba una llave de cierre '}'");
         }
     }
 
