@@ -55,6 +55,9 @@ public class Parser {
                 else if (currentToken().valor.equals("muevelas")) {
                     sentenciaControlDoWhile();
                 }
+                else if (currentToken().valor.equals("porcada")) {
+                    sentenciaControlFor();
+                }
                 else {
                     sentenciaControl();
                 }
@@ -263,12 +266,11 @@ public class Parser {
     
     // DO-WHILE
     private void sentenciaControlDoWhile() {
-        if (currentToken().valor.equals("muevelas")) {
+        if (currentToken().valor.equals("muevelas")) { 
             consume(TipoToken.PALABRA_RESERVADA); // Consume 'muevelas' (equivalente a 'do')
 
             consume(TipoToken.LLAVE_AP); // Consume '{'
 
-            // Procesa el cuerpo del do-while
             while (currentToken() != null && currentToken().tipo != TipoToken.LLAVE_CIERRE) {
                 if (currentToken().tipo == TipoToken.PALABRA_RESERVADA) {
                     if (currentToken().valor.equals("entero") || currentToken().valor.equals("flota") || currentToken().valor.equals("cadena") || currentToken().valor.equals("decompas")) {
@@ -289,6 +291,7 @@ public class Parser {
                 throw new RuntimeException("Error de sintaxis: se esperaba una llave de cierre '}'");
             }
 
+            // Verificamos la condición después de ejecutar el bloque
             consume(TipoToken.PALABRA_RESERVADA); // Consume 'mientras'
             consume(TipoToken.PARENTESIS_AP); // Consume '('
             consume(TipoToken.ID);
@@ -304,5 +307,53 @@ public class Parser {
         }
     }
 
+    // FOR
+    private void sentenciaControlFor() {
+        if (currentToken().valor.equals("porcada")) {
+            consume(TipoToken.PALABRA_RESERVADA); // Consume 'porcada'
+            consume(TipoToken.PARENTESIS_AP);
+            consume(TipoToken.PALABRA_RESERVADA); // Consume 'entero'
+            consume(TipoToken.ID); // Consume la variable (x)
+            consume(TipoToken.IGUAL); // Consume '='
+            valor(); 
+            consume(TipoToken.FIN_DE_LINEA);
+            
+            consume(TipoToken.ID); 
+            consume(TipoToken.OPERADOR_RELACIONAL); 
+            valor();
+            consume(TipoToken.FIN_DE_LINEA);
 
+            consume(TipoToken.ID ); 
+            consume(TipoToken.OPERADOR_INC_DEC);
+            consume(TipoToken.PARENTESIS_CIERRE);
+            
+            consume(TipoToken.LLAVE_AP); // Consume '{'
+
+            // Procesamos el cuerpo del for
+            while (currentToken() != null && currentToken().tipo != TipoToken.LLAVE_CIERRE) {
+                if (currentToken().tipo == TipoToken.PALABRA_RESERVADA) {
+                    // Si encontramos una palabra reservada, procesamos como declaración de variables o sentencias
+                    if (currentToken().valor.equals("entero") || currentToken().valor.equals("flota") || currentToken().valor.equals("cadena") || currentToken().valor.equals("decompas")) {
+                        declaraciónVariable();
+                    } else if (currentToken().valor.equals("sidiosquiere") || currentToken().valor.equals("noquiso")) {
+                        sentenciaControl();
+                    } else {
+                        throw new RuntimeException("Error de sintaxis en la línea: " + currentToken().valor);
+                    }
+                } else {
+                    throw new RuntimeException("Error de sintaxis en la línea: " + currentToken().valor);
+                }
+            }
+            
+            if (currentToken() != null && currentToken().tipo == TipoToken.LLAVE_CIERRE) {
+                consume(TipoToken.LLAVE_CIERRE); // Consume '}'
+            } else {
+                throw new RuntimeException("Error de sintaxis: se esperaba una llave de cierre '}'");
+            }
+        } else {
+            throw new RuntimeException("Error de sintaxis: sentencia de control desconocida, se esperaba 'porcada'");
+        }
+    }
+
+    
 }
