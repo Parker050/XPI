@@ -70,8 +70,6 @@ public class Analizador {
             System.out.println("");
         }
     }
-
-
     // Analizador Léxico (genera tokens)
     /**/
     private static List<Token> analizarLexico(String linea) {
@@ -85,28 +83,18 @@ public class Analizador {
                     tokenActual = "";
                 }
             }
-            else if (caracter == '"' && tokenActual.isEmpty()) { // Comienza una cadena
+            else if (caracter == comillas && tokenActual.isEmpty()) { // Comienza una cadena
                 tokenActual += caracter;
+                tokens.add(new Token(tokenActual, TipoToken.COMILLA_DOBLE));
                 while (++i < linea.length() && linea.charAt(i) != '"') {
                     tokenActual += linea.charAt(i);
                 }
                 tokenActual += linea.charAt(i); // Agrega la " de cierre
                 tokens.add(new Token(tokenActual, TipoToken.CADENA));
+                tokenActual = "\"";
+                tokens.add(new Token(tokenActual, TipoToken.COMILLA_DOBLE));
                 tokenActual = "";
             } 
-            /*
-            else if (caracter == '"' && tokenActual.isEmpty()) { // Comienza una cadena
-                tokenActual += caracter; // Añadimos la primera comilla
-                while (++i < linea.length() && linea.charAt(i) != '"') {
-                    tokenActual += linea.charAt(i); // Añade los caracteres dentro de la cadena
-                }
-                if (i < linea.length() && linea.charAt(i) == '"') {
-                    tokenActual += linea.charAt(i); // Añade la comilla de cierre
-                }
-                tokens.add(new Token(tokenActual, TipoToken.CADENA)); // Crea el token de tipo cadena
-                tokenActual = ""; // Reiniciar tokenActual para siguiente token
-            }*/
-            
             else if (caracter == '#' && tokenActual.isEmpty()) {
                 tokens.add(new Token("#", TipoToken.FIN_DE_LINEA));
             } else if (caracter == '=' && tokenActual.isEmpty()) {
@@ -162,6 +150,9 @@ public class Analizador {
         }
         else if (token.equals("\"")) {  // Comillas dobles
             return TipoToken.COMILLA_DOBLE;
+        }
+        else if (token.equals(":")) {  // Dos puntos
+            return TipoToken.DOS_PUNTOS;
         }
         return TipoToken.DESCONOCIDO;
     }
