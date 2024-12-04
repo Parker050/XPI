@@ -1,15 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.analizador;
 
 import java.util.List;
 
-/**
- *
- * @author danielaperez
- */
 public class Parser {
     private List<Token> tokens;
     private int index;
@@ -23,6 +15,10 @@ public class Parser {
         return index < tokens.size() ? tokens.get(index) : null;
     }
 
+    private Token currentTokenNext() {
+        return index < tokens.size() ? tokens.get(index+2) : null;
+    }
+
     private void consume(TipoToken tipoEsperado) {
         if (currentToken() != null && currentToken().tipo == tipoEsperado) {
             index++;
@@ -34,8 +30,12 @@ public class Parser {
     public void parse() {
         while (index < tokens.size()) {
             if (currentToken().tipo == TipoToken.PALABRA_RESERVADA) {
-                if (currentToken().valor.equals("entero") ) {
-                    declaraciónVariable();
+               if (currentToken().valor.equals("entero") || currentToken().valor.equals("flota") || currentToken().valor.equals("cadena")) {
+                    if (currentTokenNext().valor.equals("[")) {
+                        declaracionDeArray();
+                    } else {
+                        declaraciónVariable();
+                    }
                 }
                 else if (currentToken().valor.equals("decompas")) {
                     declaraciónVariableBool();
@@ -70,6 +70,65 @@ public class Parser {
             } else {
                 throw new RuntimeException("Error de sintaxis en la línea: " + currentToken().valor);
             }
+        }
+    }
+
+    private void declaracionDeArray(){
+        switch (currentToken().valor) {
+            case "entero":
+                consume(TipoToken.PALABRA_RESERVADA);
+                consume(TipoToken.ID);
+                consume(TipoToken.CORCHETE_AP);
+                consume(TipoToken.CORCHETE_CIERRE);
+                consume(TipoToken.IGUAL);
+                consume(TipoToken.LLAVE_AP);
+                while (currentToken() != null && currentToken().tipo != TipoToken.LLAVE_CIERRE) {
+                    consume(TipoToken.NUMERO);
+                }
+                if (currentToken() != null && currentToken().tipo == TipoToken.LLAVE_CIERRE) {
+                    consume(TipoToken.LLAVE_CIERRE); // Consume '}'
+                } else {
+                    throw new RuntimeException("Error de sintaxis: se esperaba una llave de cierre '}'");
+                }
+                consume(TipoToken.FIN_DE_LINEA);
+                break;
+            case "cadena":
+                consume(TipoToken.PALABRA_RESERVADA);
+                consume(TipoToken.ID);
+                consume(TipoToken.CORCHETE_AP);
+                consume(TipoToken.CORCHETE_CIERRE);
+                consume(TipoToken.IGUAL);
+                consume(TipoToken.LLAVE_AP);
+                while (currentToken() != null && currentToken().tipo != TipoToken.LLAVE_CIERRE) {
+                    consume(TipoToken.CADENA);
+                }
+                if (currentToken() != null && currentToken().tipo == TipoToken.LLAVE_CIERRE) {
+                    consume(TipoToken.LLAVE_CIERRE); // Consume '}'
+                } else {
+                    throw new RuntimeException("Error de sintaxis: se esperaba una llave de cierre '}'");
+                }
+                consume(TipoToken.FIN_DE_LINEA);
+                break;
+            case "flota":
+                consume(TipoToken.PALABRA_RESERVADA);
+                consume(TipoToken.ID);
+                consume(TipoToken.CORCHETE_AP);
+                consume(TipoToken.CORCHETE_CIERRE);
+                consume(TipoToken.IGUAL);
+                consume(TipoToken.LLAVE_AP);
+                while (currentToken() != null && currentToken().tipo != TipoToken.LLAVE_CIERRE) {
+                    System.out.println("Entra a float");
+                    consume(TipoToken.NUMERO_F);
+                }
+                if (currentToken() != null && currentToken().tipo == TipoToken.LLAVE_CIERRE) {
+                    consume(TipoToken.LLAVE_CIERRE); // Consume '}'
+                } else {
+                    throw new RuntimeException("Error de sintaxis: se esperaba una llave de cierre '}'");
+                }
+                consume(TipoToken.FIN_DE_LINEA);
+                break;
+            default:
+                throw new AssertionError();
         }
     }
 
